@@ -14,9 +14,10 @@ DEPTH_LEVEL_END = 2.1
 DEPTH_LEVEL_STEP = 0.2
 MIN_CONTOUR_AREA = 1000
 DECISION_THRESHOLD = 0.5
+# 기존 DepthEstimator 클래스를 이 코드로 전체 교체하세요.
 
 class DepthEstimator:
-    """TensorRT 엔진을 로드하고 깊이 추론을 수행하는 클래스 (최신 API 호환)"""
+    """TensorRT 엔진을 로드하고 깊이 추론을 수행하는 클래스 (TensorRT 7.x 호환)"""
     def __init__(self, engine_path):
         self.logger = trt.Logger(trt.Logger.WARNING)
         self.runtime = trt.Runtime(self.logger)
@@ -32,26 +33,30 @@ class DepthEstimator:
         self.context = self.engine.create_execution_context()
         print("✅ 엔진 로드 및 컨텍스트 생성 완료.")
 
-        # --- 💡 수정된 부분 시작 💡 ---
+        # --- 💡 구버전 API 호환 수정 💡 ---
+        self.bindings = []
+        self.output_shapes = []
+        for binding in self.engine:
+            shape = self.engine.get_binding_shape(binding)
+            size = trt.volume(shape)
+            dtype = trt.nptype(self.engine.get_binding_dtype(binding))
+            
+            # Host(CPU)와 Device(GPU) 메모리 할당
+            host_mem = cuda.pagelocked_empty(size, dtype)
+            device_mem = cuda.mem_alloc(host_mem.nbytes)
+            
+            # 바인딩 주소를 리스트에 추가
+            self.bindings.append(int(device_mem))
+            
+            if self.engine.binding_is_input(binding):
+                self.h_input = host_mem
+                self.d_input = device_mem
+            else:
+                self.h_output = host_mem
+                self.d_output = device_mem
+                self.output_shapes.append(shape)
 
-        # 입출력 텐서의 '이름'을 가져옵니다. (기존: 인덱스 사용)
-        self.input_name = self.engine.get_binding_name(0)
-        self.output_name = self.engine.get_binding_name(1)
-
-        # 텐서의 '이름'을 사용해 shape을 가져옵니다. (기존: get_binding_shape)
-        input_shape = self.engine.get_tensor_shape(self.input_name)
-        output_shape = self.engine.get_tensor_shape(self.output_name)
-
-        # 입출력 버퍼 할당
-        self.h_input = cuda.pagelocked_empty(trt.volume(input_shape), dtype=np.float32)
-        self.h_output = cuda.pagelocked_empty(trt.volume(output_shape), dtype=np.float32)
-        self.d_input = cuda.mem_alloc(self.h_input.nbytes)
-        self.d_output = cuda.mem_alloc(self.h_output.nbytes)
         self.stream = cuda.Stream()
-        
-        # 바인딩을 위한 주소 목록 준비
-        self.bindings = [int(self.d_input), int(self.d_output)]
-        
         # --- 수정된 부분 끝 ---
 
     def __del__(self):
