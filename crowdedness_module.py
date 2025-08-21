@@ -16,7 +16,7 @@ MIN_CONTOUR_AREA = 1000
 DECISION_THRESHOLD = 0.5
 
 class DepthEstimator:
-    """TensorRT 엔진을 로드하고 깊이 추론을 수행하는 클래스"""
+    """TensorRT 엔진을 로드하고 깊이 추론을 수행하는 클래스 (최신 API 호환)"""
     def __init__(self, engine_path):
         self.logger = trt.Logger(trt.Logger.WARNING)
         self.runtime = trt.Runtime(self.logger)
@@ -31,12 +31,28 @@ class DepthEstimator:
             
         self.context = self.engine.create_execution_context()
         print("✅ 엔진 로드 및 컨텍스트 생성 완료.")
-        
-        self.h_input = cuda.pagelocked_empty(trt.volume(self.engine.get_binding_shape(0)), dtype=np.float32)
-        self.h_output = cuda.pagelocked_empty(trt.volume(self.engine.get_binding_shape(1)), dtype=np.float32)
+
+        # --- 💡 수정된 부분 시작 💡 ---
+
+        # 입출력 텐서의 '이름'을 가져옵니다. (기존: 인덱스 사용)
+        self.input_name = self.engine.get_binding_name(0)
+        self.output_name = self.engine.get_binding_name(1)
+
+        # 텐서의 '이름'을 사용해 shape을 가져옵니다. (기존: get_binding_shape)
+        input_shape = self.engine.get_tensor_shape(self.input_name)
+        output_shape = self.engine.get_tensor_shape(self.output_name)
+
+        # 입출력 버퍼 할당
+        self.h_input = cuda.pagelocked_empty(trt.volume(input_shape), dtype=np.float32)
+        self.h_output = cuda.pagelocked_empty(trt.volume(output_shape), dtype=np.float32)
         self.d_input = cuda.mem_alloc(self.h_input.nbytes)
         self.d_output = cuda.mem_alloc(self.h_output.nbytes)
         self.stream = cuda.Stream()
+        
+        # 바인딩을 위한 주소 목록 준비
+        self.bindings = [int(self.d_input), int(self.d_output)]
+        
+        # --- 수정된 부분 끝 ---
 
     def __del__(self):
         self.d_input.free()
