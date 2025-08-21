@@ -14,7 +14,7 @@ HEADER_FORMAT = '<4sHH'
 EV_RECOG_INFO_PAYLOAD_FORMAT = '<BBBB4x'
 
 def create_full_spec_packet(payload_state):
-    header = struct.pack(HEADER_FORMAT, START_BYTE, ID_EV_RECOG_INFO, 8)
+    header = struct.pack(HEADER_FORMAT, START_BYTE, ID_EV_RECOG_INFO, 16)
     payload = struct.pack(
         EV_RECOG_INFO_PAYLOAD_FORMAT,
         payload_state['activate_status'],
