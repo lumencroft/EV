@@ -59,12 +59,24 @@ class DepthEstimator:
     def run_inference(self, image_bgr):
         tensor = self._preprocess_image(image_bgr)
         np.copyto(self.h_input, tensor.ravel())
+        
         cuda.memcpy_htod_async(self.d_input, self.h_input, self.stream)
-        self.context.execute_async_v2(bindings=[int(self.d_input), int(self.d_output)], stream_handle=self.stream.handle)
+        
+        # --- 💡 수정된 부분 시작 💡 ---
+        # 1. 텐서의 GPU 메모리 주소를 컨텍스트에 명시적으로 설정합니다.
+        self.context.set_tensor_address(self.input_name, int(self.d_input))
+        self.context.set_tensor_address(self.output_name, int(self.d_output))
+
+        # 2. v2 대신 v3 메서드를 사용하여 추론을 실행합니다. (bindings 인자 없음)
+        self.context.execute_async_v3(stream_handle=self.stream.handle)
+        # --- 💡 수정된 부분 끝 💡 ---
+
         cuda.memcpy_dtoh_async(self.h_output, self.d_output, self.stream)
         self.stream.synchronize()
-        output_shape = (1, self.engine.get_binding_shape(1)[2], self.engine.get_binding_shape(1)[3])
-        depth_map = self.h_output.reshape(output_shape)
+        
+        # 일관성을 위해 __init__에서 저장한 output_shape 사용
+        depth_map = self.h_output.reshape(self.output_shape)
+        
         return np.squeeze(depth_map)
 
     def _preprocess_image(self, image_bgr):
