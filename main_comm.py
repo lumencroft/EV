@@ -5,7 +5,7 @@ import door_status_module as door_checker
 import crowdedness_module as crowd_checker
 
 ROBOT_HMI_IP = '192.168.1.30'
-JETSON_AI_IP = '192.168.1.21'
+JETSON_AI_IP = '0.0.0.0'
 PORT = 5001
 
 START_BYTE = b'POLA'
@@ -55,12 +55,12 @@ def main():
                 status_text = "Closed" if door_status == 2 else "Open"
                 print(f"  Checking Door Status... {status_text}")
                 
-                cv2.imshow("Door Check", frame)
-                if cv2.waitKey(500) & 0xFF == ord('q'): break
+                # cv2.imshow("Door Check", frame)
+                # if cv2.waitKey(500) & 0xFF == ord('q'): break
 
                 if door_status == 1:
                     print(f"\n✅ 문 열림 감지! [2단계] 15프레임 혼잡도 측정을 시작합니다.")
-                    cv2.destroyWindow("Door Check")
+                    # cv2.destroyWindow("Door Check")
                     break
             
             go_frame_streak = 0
