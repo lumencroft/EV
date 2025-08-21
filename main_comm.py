@@ -26,9 +26,9 @@ def create_full_spec_packet(payload_state):
 
 def main():
     base_payload_state = {
-        'activate_status': 0,
-        'door_status': 0,
-        'boarding_status': 0,
+        'activate_status': 5,
+        'door_status': 1,
+        'boarding_status': 1,
     }
     
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -85,7 +85,7 @@ def main():
                 if go_frame_streak >= 5:
                     print(f"\n✅ 5프레임 연속 'Go' 감지! HMI에게 Go 명령을 전송합니다.")
                     final_payload = base_payload_state.copy()
-                    final_payload['door_status'] = 0
+                    final_payload['door_status'] = 1
                     final_payload['crowdedness'] = 1
                     packet_to_send = create_full_spec_packet(final_payload)
                     sock.sendto(packet_to_send, (ROBOT_HMI_IP, PORT))
@@ -97,7 +97,7 @@ def main():
             if not command_sent:
                 print(f"\n❌ 타임아웃! HMI에게 Stop 명령을 전송합니다.")
                 final_payload = base_payload_state.copy()
-                final_payload['door_status'] = 0
+                final_payload['door_status'] = 1
                 final_payload['crowdedness'] = 2
                 packet_to_send = create_full_spec_packet(final_payload)
                 sock.sendto(packet_to_send, (ROBOT_HMI_IP, PORT))
