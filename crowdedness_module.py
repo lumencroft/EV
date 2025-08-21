@@ -14,10 +14,9 @@ DEPTH_LEVEL_END = 2.1
 DEPTH_LEVEL_STEP = 0.2
 MIN_CONTOUR_AREA = 1000
 DECISION_THRESHOLD = 0.5
-# 기존 DepthEstimator 클래스를 이 코드로 전체 교체하세요.
 
 class DepthEstimator:
-    """TensorRT 엔진을 로드하고 깊이 추론을 수행하는 클래스 (TensorRT 7.x 호환)"""
+    """TensorRT 10 API에 맞춰 수정된 최종 버전 클래스"""
     def __init__(self, engine_path):
         self.logger = trt.Logger(trt.Logger.WARNING)
         self.runtime = trt.Runtime(self.logger)
@@ -33,31 +32,25 @@ class DepthEstimator:
         self.context = self.engine.create_execution_context()
         print("✅ 엔진 로드 및 컨텍스트 생성 완료.")
 
-        # --- 💡 구버전 API 호환 수정 💡 ---
-        self.bindings = []
-        self.output_shapes = []
-        for binding in self.engine:
-            shape = self.engine.get_binding_shape(binding)
-            size = trt.volume(shape)
-            dtype = trt.nptype(self.engine.get_binding_dtype(binding))
-            
-            # Host(CPU)와 Device(GPU) 메모리 할당
-            host_mem = cuda.pagelocked_empty(size, dtype)
-            device_mem = cuda.mem_alloc(host_mem.nbytes)
-            
-            # 바인딩 주소를 리스트에 추가
-            self.bindings.append(int(device_mem))
-            
-            if self.engine.binding_is_input(binding):
-                self.h_input = host_mem
-                self.d_input = device_mem
-            else:
-                self.h_output = host_mem
-                self.d_output = device_mem
-                self.output_shapes.append(shape)
+        # --- 💡 TensorRT 10 API 최종 수정 💡 ---
 
+        # 1. 텐서 '이름' 가져오기 (TRT 10: get_binding_name -> get_tensor_name)
+        self.input_name = self.engine.get_tensor_name(0)
+        self.output_name = self.engine.get_tensor_name(1)
+        
+        # 2. 텐서 '모양(shape)' 가져오기 (TRT 10: engine.get_tensor_shape 사용)
+        input_shape = self.engine.get_tensor_shape(self.input_name)
+        output_shape = self.engine.get_tensor_shape(self.output_name)
+        self.output_shape = tuple(output_shape) # 나중에 사용하기 위해 저장
+
+        # 3. 입출력 버퍼 할당
+        self.h_input = cuda.pagelocked_empty(trt.volume(input_shape), dtype=np.float32)
+        self.h_output = cuda.pagelocked_empty(trt.volume(output_shape), dtype=np.float32)
+        self.d_input = cuda.mem_alloc(self.h_input.nbytes)
+        self.d_output = cuda.mem_alloc(self.h_output.nbytes)
+        
+        # 4. 스트림 및 바인딩 준비
         self.stream = cuda.Stream()
-        # --- 수정된 부분 끝 ---
 
     def __del__(self):
         self.d_input.free()
