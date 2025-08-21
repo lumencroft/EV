@@ -79,7 +79,7 @@ def main():
                 
                 print(f"  Frame {frame_count:2d}: Decision={decision} (Go Streak: {go_frame_streak})")
                 
-                cv2.imshow("Crowdedness Check", frame)
+                # cv2.imshow("Crowdedness Check", frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'): break
 
                 if go_frame_streak >= 5:
