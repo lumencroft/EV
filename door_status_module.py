@@ -32,51 +32,51 @@ def get_door_status(frame):
     # 설정된 비율(MIN_AREA_RATIO)을 넘으면 True(OPEN) 반환
     return area_ratio > MIN_AREA_RATIO
 
-# # 1. 웹캠 열기
-# cap = cv2.VideoCapture(0)
+# 1. 웹캠 열기
+cap = cv2.VideoCapture(0)
 
-# # 2. 해상도 설정 (640x480)
-# cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-# cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+# 2. 해상도 설정 (640x480)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-# while True:
-#     # 프레임 읽기
-#     ret, frame = cap.read()
-#     if not ret:
-#         print("카메라를 찾을 수 없습니다.")
-#         break
+while True:
+    # 프레임 읽기
+    ret, frame = cap.read()
+    if not ret:
+        print("카메라를 찾을 수 없습니다.")
+        break
 
-#     # 3. 문 상태 분석
-#     is_open = get_door_status(frame)
+    # 3. 문 상태 분석
+    is_open = get_door_status(frame)
     
-#     # 상태에 따라 텍스트와 색상 결정
-#     if is_open:
-#         status_text = "OPEN"
-#         box_color = (0, 0, 255)  # 빨간색
-#     else:
-#         status_text = "CLOSED"
-#         box_color = (0, 255, 0)  # 초록색
+    # 상태에 따라 텍스트와 색상 결정
+    if is_open:
+        status_text = "OPEN"
+        box_color = (0, 0, 255)  # 빨간색
+    else:
+        status_text = "CLOSED"
+        box_color = (0, 255, 0)  # 초록색
 
-    # 4. Bounding Box 그리기
-    # height, width, _ = frame.shape
-    # top = int(height * ROI_RATIO[0])
-    # bottom = int(height * ROI_RATIO[1])
-    # left = int(width * ROI_RATIO[2])
-    # right = int(width * ROI_RATIO[3])
+    #4. Bounding Box 그리기
+    height, width, _ = frame.shape
+    top = int(height * ROI_RATIO[0])
+    bottom = int(height * ROI_RATIO[1])
+    left = int(width * ROI_RATIO[2])
+    right = int(width * ROI_RATIO[3])
     
-    # 화면에 사각형 그리기
-    # cv2.rectangle(frame, (left, top), (right, bottom), box_color, 2)
+    #화면에 사각형 그리기
+    cv2.rectangle(frame, (left, top), (right, bottom), box_color, 2)
     
-    # 5. 상태 텍스트 표시
-    # cv2.putText(frame, status_text, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, box_color, 2)
+    #5. 상태 텍스트 표시
+    cv2.putText(frame, status_text, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, box_color, 2)
 
-    # 화면에 영상 출력
-    # cv2.imshow("Door Status Cam", frame)
+    #화면에 영상 출력
+    cv2.imshow("Door Status Cam", frame)
 
-    # 'q' 키를 누르면 종료
-    # if cv2.waitKey(1) & 0xFF == ord('q'):
-    #     break
+    #'q' 키를 누르면 종료
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
-# # 자원 해제
-# cap.release()
-# cv2.destroyAllWindows()
+# 자원 해제
+cap.release()
+cv2.destroyAllWindows()
