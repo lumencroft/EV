@@ -35,7 +35,7 @@ def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((JETSON_AI_IP, PORT))
     
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 
     print(f"AI 시뮬레이터 시작 (수신 대기: {JETSON_AI_IP}:{PORT})")
 
