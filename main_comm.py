@@ -75,7 +75,7 @@ def main():
             go_frame_streak = 0
             command_sent = False
 
-            for frame_count in range(1, 16):
+            for frame_count in range(1, 51):
                 ret, frame = cap.read()
                 if not ret: break
 
@@ -91,8 +91,8 @@ def main():
                 # cv2.imshow("Crowdedness Check", frame)
                 # if cv2.waitKey(1) & 0xFF == ord('q'): break
 
-                if go_frame_streak >= 5:
-                    print(f"\n✅ 5프레임 연속 'Go' 감지! HMI에게 Go 명령을 전송합니다.")
+                if go_frame_streak >= 20:
+                    print(f"\n✅ 15프레임 연속 'Go' 감지! HMI에게 Go 명령을 전송합니다.")
                     final_payload = base_payload_state.copy()
                     final_payload['door_status'] = 1
                     final_payload['crowdedness'] = 1
