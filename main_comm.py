@@ -1,6 +1,7 @@
 import socket
 import struct
 import cv2
+import time  # time 모듈 추가
 import door_status_module as door_checker
 import crowdedness_module as crowd_checker
 
@@ -47,19 +48,27 @@ def main():
         if addr[0] == ROBOT_HMI_IP:
             print(f"\n📬 HMI 신호 수신! [1단계] 문 열림 감지를 시작합니다.")
             
+            door_open_streak = 0  # 문 열림 연속 프레임 카운터
             while True:
                 ret, frame = cap.read()
                 if not ret: break
                 
                 door_status = door_checker.get_door_status(frame)
-                status_text = "Closed" if door_status == 2 else "Open"
-                print(f"  Checking Door Status... {status_text}")
+                
+                if door_status == 1: # 문이 열렸으면
+                    door_open_streak += 1
+                else: # 문이 닫혔으면
+                    door_open_streak = 0 # 카운터 초기화
+                
+                status_text = "Open" if door_status == 1 else "Closed"
+                print(f"  Checking Door Status... {status_text} (Streak: {door_open_streak})")
                 
                 # cv2.imshow("Door Check", frame)
-                # if cv2.waitKey(500) & 0xFF == ord('q'): break
+                # if cv2.waitKey(1) & 0xFF == ord('q'): break
 
-                if door_status == 1:
-                    print(f"\n✅ 문 열림 감지! [2단계] 15프레임 혼잡도 측정을 시작합니다.")
+                if door_open_streak >= 5: # 5프레임 연속으로 열림이 감지되면
+                    print(f"\n✅ 5프레임 연속 문 열림 감지! 0.5초 후 혼잡도 측정을 시작합니다.")
+                    time.sleep(0.5) # 0.5초 대기
                     # cv2.destroyWindow("Door Check")
                     break
             
@@ -80,7 +89,7 @@ def main():
                 print(f"  Frame {frame_count:2d}: Decision={decision} (Go Streak: {go_frame_streak})")
                 
                 # cv2.imshow("Crowdedness Check", frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'): break
+                # if cv2.waitKey(1) & 0xFF == ord('q'): break
 
                 if go_frame_streak >= 5:
                     print(f"\n✅ 5프레임 연속 'Go' 감지! HMI에게 Go 명령을 전송합니다.")
@@ -92,7 +101,7 @@ def main():
                     command_sent = True
                     break
             
-            cv2.destroyWindow("Crowdedness Check")
+            # cv2.destroyWindow("Crowdedness Check")
 
             if not command_sent:
                 print(f"\n❌ 타임아웃! HMI에게 Stop 명령을 전송합니다.")
@@ -103,7 +112,7 @@ def main():
                 sock.sendto(packet_to_send, (ROBOT_HMI_IP, PORT))
 
     cap.release()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
     sock.close()
 
 if __name__ == '__main__':
