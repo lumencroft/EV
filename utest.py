@@ -15,7 +15,7 @@ DEPTH_LEVEL_STEP = 0.2
 MIN_CONTOUR_AREA = 1000
 DECISION_THRESHOLD = 0.5
 
-# --- 2. 클래스 및 함수 정의 ---
+# --- 2. 클래스 및 함수 정의 (이전과 동일) ---
 
 class DepthEstimator:
     """TensorRT 10 API에 맞춰 수정된 최종 버전 클래스"""
@@ -52,7 +52,6 @@ class DepthEstimator:
         self.stream = cuda.Stream()
 
     def __del__(self):
-        # 자원 해제 시 에러 방지를 위해 hasattr로 확인
         if hasattr(self, 'd_input') and self.d_input:
             self.d_input.free()
         if hasattr(self, 'd_output') and self.d_output:
@@ -102,7 +101,6 @@ def calculate_occupancy_and_visualize(depth_map, original_shape):
             
         hull = cv2.convexHull(main_contour)
         
-        # 시각화: 등고선(초록색), Convex Hull(노란색) 그리기
         cv2.drawContours(contour_canvas, [main_contour], -1, (0, 255, 0), 1)
         cv2.drawContours(contour_canvas, [hull], -1, (0, 255, 255), 1)
 
@@ -117,18 +115,20 @@ def calculate_occupancy_and_visualize(depth_map, original_shape):
 
 def main():
     """웹캠을 실행하고 실시간으로 혼잡도를 분석 및 시각화합니다."""
-    # 모델 초기화
     try:
         depth_model = DepthEstimator(TENSORRT_ENGINE_PATH)
     except Exception as e:
         print(f"모델 초기화 중 심각한 오류 발생: {e}")
         return
 
-    # 웹캠 열기
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("오류: 웹캠을 열 수 없습니다.")
         return
+
+    # ✨ 웹캠 해상도 설정 (640x480) ✨
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
     print("웹캠 시작... 'q'를 누르면 종료됩니다.")
 
@@ -138,43 +138,34 @@ def main():
             print("오류: 프레임을 읽을 수 없습니다.")
             break
         
-        # 1. Depth Map 추론
         depth_map = depth_model.run_inference(frame)
         
-        # 2. 점수 계산 및 시각화용 데이터 생성
         score, contour_canvas = calculate_occupancy_and_visualize(depth_map, frame.shape[:2])
         
-        # 3. 최종 결정 (GO / STOP)
         if score > DECISION_THRESHOLD:
-            decision = 2  # STOP
             status_text = "STOP"
-            color = (0, 0, 255)  # 빨간색
+            color = (0, 0, 255)
         else:
-            decision = 1  # GO
             status_text = "GO"
-            color = (0, 255, 0)  # 초록색
+            color = (0, 255, 0)
         
-        # 4. 화면에 결과 표시
-        # 메인 화면에 점수와 상태 표시
         score_text = f"Score: {score:.2f}"
         cv2.putText(frame, status_text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.5, color, 3)
         cv2.putText(frame, score_text, (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
-        # Depth Map 시각화 (컬러맵 적용)
         depth_viz = cv2.normalize(depth_map, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
         depth_viz = cv2.applyColorMap(depth_viz, cv2.COLORMAP_JET)
+        
+        # depth_viz_resized는 frame 크기를 따라가므로 자동으로 640x480이 됩니다.
         depth_viz_resized = cv2.resize(depth_viz, (frame.shape[1], frame.shape[0]))
 
-        # 5. 창 보여주기
         cv2.imshow("Crowdedness Cam", frame)
         cv2.imshow("Depth Map", depth_viz_resized)
         cv2.imshow("Contours", contour_canvas)
 
-        # 'q' 키를 누르면 종료
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # 자원 해제
     cap.release()
     cv2.destroyAllWindows()
     del depth_model
