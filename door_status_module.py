@@ -4,7 +4,7 @@ import numpy as np
 # 설정값 (상수)
 ROI_RATIO = (0.00, 0.20, 0.35, 0.65)  # (top, bottom, left, right) 비율
 BRIGHTNESS_THRESHOLD = 210            # 밝기 임계값
-MIN_AREA_RATIO = 0.25                 # 밝은 영역이 ROI의 40% 이상이면 'OPEN'으로 판단
+MIN_AREA_RATIO = 0.15                 # 밝은 영역이 ROI의 40% 이상이면 'OPEN'으로 판단
 
 def get_door_status(frame):
     """주어진 프레임의 ROI를 분석하여 문 상태를 반환하는 함수"""
