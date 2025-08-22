@@ -30,7 +30,7 @@ def get_door_status(frame):
     area_ratio = bright_area / total_roi_area if total_roi_area > 0 else 0
     
     # 설정된 비율(MIN_AREA_RATIO)을 넘으면 True(OPEN) 반환
-    return area_ratio > MIN_AREA_RATIO
+    return int(area_ratio > MIN_AREA_RATIO)
 
 # 1. 웹캠 열기
 cap = cv2.VideoCapture(0)
