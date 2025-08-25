@@ -12,17 +12,37 @@ PAYLOAD_FORMAT = '<BBBB4x'
 class Communicator:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.settimeout(1.0)
         self.sock.bind((JETSON_AI_IP, PORT))
         self.hmi_address = (ROBOT_HMI_IP, PORT)
         print(f"Socket initialized. Listening on {JETSON_AI_IP}:{PORT}")
 
     def wait_for_signal(self):
-        print(f"\nWaiting for signal from HMI ({ROBOT_HMI_IP})...")
+        print(f"\nWaiting for start signal (ID 109, Payload 5,0,0,0) from HMI...")
         while True:
-            data, addr = self.sock.recvfrom(1024)
-            if addr[0] == ROBOT_HMI_IP:
-                print("Signal received from HMI.")
-                return True
+            try:
+                data, addr = self.sock.recvfrom(1024)
+                
+                if addr[0] != ROBOT_HMI_IP:
+                    continue
+
+                if len(data) < 16:
+                    continue
+                
+                header_data = data[:8]
+                payload_data = data[8:16]
+                
+                _, packet_id, _ = struct.unpack(HEADER_FORMAT, header_data)
+                
+                if packet_id == ID_EV_RECOG_INFO:
+                    actv, door, board, crowd = struct.unpack(PAYLOAD_FORMAT, payload_data)
+                    
+                    if actv == 5 and door == 0 and board == 0 and crowd == 0:
+                        print("Correct start signal received from HMI.")
+                        return True
+
+            except socket.timeout:
+                continue
 
     def send_command(self, crowdedness_status):
         payload_state = {
