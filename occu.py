@@ -1,4 +1,4 @@
-# occuModule.py
+# occu.py (수정)
 
 import cv2
 import numpy as np
@@ -12,6 +12,9 @@ def calculate_occupancy_score(depth_map, original_shape):
     h, w = original_shape
     depth_map_resized = cv2.resize(depth_map, (w, h))
     total_ratio = 0.0
+    
+    contours_to_draw = []
+    hulls_to_draw = []
     
     levels = np.arange(DEPTH_LEVEL_START, DEPTH_LEVEL_END, DEPTH_LEVEL_STEP)
     for level in levels:
@@ -27,8 +30,11 @@ def calculate_occupancy_score(depth_map, original_shape):
         if area_contour < MIN_CONTOUR_AREA:
             continue
 
-        area_hull = cv2.contourArea(cv2.convexHull(main_contour))
+        hull = cv2.convexHull(main_contour)
+        area_hull = cv2.contourArea(hull)
         if area_hull > 0:
             total_ratio += (area_hull - area_contour) / area_hull
+            contours_to_draw.append(main_contour)
+            hulls_to_draw.append(hull)
             
-    return total_ratio
+    return total_ratio, contours_to_draw, hulls_to_draw

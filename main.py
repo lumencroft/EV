@@ -23,7 +23,7 @@ def get_crowdedness_decision(frame):
         return 1
     
     depth_map = depth_model.run_inference(frame)
-    score = occu.calculate_occupancy_score(depth_map, frame.shape[:2])
+    score, _ , _ = occu.calculate_occupancy_score(depth_map, frame.shape[:2])
     
     return 2 if score > DECISION_THRESHOLD else 1
 
