@@ -1,9 +1,9 @@
 import cv2
 import time
-import doorModule
-import occuModule
-import depthModule
-from commuModule import Communicator
+import door
+import occu
+import depth
+from commu import Communicator
 
 DOOR_OPEN_STREAK_THRESHOLD = 5
 GO_STREAK_THRESHOLD = 10
@@ -11,7 +11,7 @@ CROWD_CHECK_FRAMES = 20
 DECISION_THRESHOLD = 0.5
 
 try:
-    depth_model = depthModule.DepthEstimator(depthModule.TENSORRT_ENGINE_PATH)
+    depth_model = depth.DepthEstimator(depth.TENSORRT_ENGINE_PATH)
 except Exception as e:
     print(f"Model initialization failed: {e}")
     depth_model = None
@@ -23,7 +23,7 @@ def get_crowdedness_decision(frame):
         return 1
     
     depth_map = depth_model.run_inference(frame)
-    score = occuModule.calculate_occupancy_score(depth_map, frame.shape[:2])
+    score = occu.calculate_occupancy_score(depth_map, frame.shape[:2])
     
     return 2 if score > DECISION_THRESHOLD else 1
 
@@ -47,7 +47,7 @@ def main():
             ret, frame = cap.read()
             if not ret: continue
             
-            if doorModule.get_door_status(frame) == 1:
+            if door.get_door_status(frame) == 1:
                 door_open_streak += 1
             else:
                 door_open_streak = 0
