@@ -2,7 +2,7 @@ import socket
 import struct
 
 ROBOT_HMI_IP = '192.168.1.30'
-JETSON_AI_IP = '0.0.0.0'
+JETSON_AI_IP = '192.168.1.21'
 PORT = 5001
 START_BYTE = b'POLA'
 ID_EV_RECOG_INFO = 109
