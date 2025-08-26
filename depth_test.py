@@ -6,7 +6,7 @@ import occu
 import depth
 
 try:
-    depth_model = depth.DepthEstimator()
+    depth_model = depth.DepthEstimator("depth.engine")
 except Exception as e:
     print(f"Model initialization failed: {e}")
     depth_model = None
