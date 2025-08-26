@@ -6,7 +6,7 @@ import occu
 import depth
 
 try:
-    depth_model = depth.DepthEstimator(depth.OPENVINO_MODEL_XML_PATH)
+    depth_model = depth.DepthEstimator()
 except Exception as e:
     print(f"Model initialization failed: {e}")
     depth_model = None
