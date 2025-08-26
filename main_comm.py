@@ -1,5 +1,6 @@
 import cv2
 import time
+import os  # <-- ADDED: For creating directories
 import door
 import occu
 import depth
@@ -36,12 +37,16 @@ def main():
         comm.close()
         return
 
+    main_cycle_count = 0  # <-- ADDED: Main loop counter
+
     while True:
+        main_cycle_count += 1 # <-- ADDED: Increment the counter
         comm.wait_for_signal()
 
         door_open_streak = 0
         door_opened = False
-        print("\nPhase 1: Starting door check...")
+        print(f"\n--- Cycle {main_cycle_count} ---") # <-- MODIFIED: Added cycle count to log
+        print("Phase 1: Starting door check...")
         
         for _ in range(99999):
             ret, frame = cap.read()
@@ -73,6 +78,24 @@ def main():
             if not ret: continue
 
             decision = get_crowdedness_decision(frame)
+
+            # === ADDED: Image Saving Logic ===
+            if main_cycle_count <= 50:
+                # 1. Determine folder name from decision
+                decision_folder = "go" if decision == 1 else "stop"
+                
+                # 2. Define the full path to save the image
+                save_path = os.path.join(str(main_cycle_count), decision_folder)
+                
+                # 3. Create the directory if it doesn't exist
+                os.makedirs(save_path, exist_ok=True)
+                
+                # 4. Define the image filename
+                filename = os.path.join(save_path, f"frame_{frame_count}.jpg")
+                
+                # 5. Save the original frame
+                cv2.imwrite(filename, frame)
+            # ==================================
             
             if decision == 1:
                 go_frame_streak += 1
