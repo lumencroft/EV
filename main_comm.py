@@ -12,7 +12,7 @@ CROWD_CHECK_FRAMES = 20
 DECISION_THRESHOLD = 0.5
 
 try:
-    depth_model = depth.DepthEstimator(depth.TENSORRT_ENGINE_PATH)
+    depth_model = depth.DepthEstimator(depth.ENGINE_PATH)
 except Exception as e:
     print(f"Model initialization failed: {e}")
     depth_model = None

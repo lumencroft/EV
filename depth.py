@@ -8,7 +8,7 @@ import pycuda.autoinit
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TENSORRT_ENGINE_PATH = os.path.join(BASE_DIR, "depth.engine")
+ENGINE_PATH = os.path.join(BASE_DIR, "depth.engine")
 MODEL_INPUT_SHAPE = (518, 518)
 PREPROCESS_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 PREPROCESS_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
