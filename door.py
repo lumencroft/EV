@@ -3,7 +3,7 @@ import numpy as np
 
 ROI_RATIO = (0.00, 0.20, 0.10, 0.90)
 BRIGHTNESS_THRESHOLD = 210
-MIN_AREA_RATIO = 0.2
+MIN_AREA_RATIO = 0.15
 
 def get_door_status(frame):
     h, w = frame.shape[:2]

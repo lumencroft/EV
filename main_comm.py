@@ -40,34 +40,34 @@ def main():
     main_cycle_count = 0  # <-- ADDED: Main loop counter
 
     while True:
-        main_cycle_count += 1 # <-- ADDED: Increment the counter
-        comm.wait_for_signal()
+        # main_cycle_count += 1 # <-- ADDED: Increment the counter
+        # comm.wait_for_signal()
 
-        door_open_streak = 0
-        door_opened = False
-        print(f"\n--- Cycle {main_cycle_count} ---") # <-- MODIFIED: Added cycle count to log
-        print("Phase 1: Starting door check...")
+        # door_open_streak = 0
+        # door_opened = False
+        # print(f"\n--- Cycle {main_cycle_count} ---") # <-- MODIFIED: Added cycle count to log
+        # print("Phase 1: Starting door check...")
         
-        for _ in range(99999):
-            ret, frame = cap.read()
-            if not ret: continue
+        # for _ in range(99999):
+        #     ret, frame = cap.read()
+        #     if not ret: continue
             
-            if door.get_door_status(frame) == 1:
-                door_open_streak += 1
-            else:
-                door_open_streak = 0
+        #     if door.get_door_status(frame) == 1:
+        #         door_open_streak += 1
+        #     else:
+        #         door_open_streak = 0
             
-            print(f"  Door status: {'Open' if door_open_streak > 0 else 'Closed'}. Streak: {door_open_streak}", end='\r')
+        #     print(f"  Door status: {'Open' if door_open_streak > 0 else 'Closed'}. Streak: {door_open_streak}", end='\r')
 
-            if door_open_streak >= DOOR_OPEN_STREAK_THRESHOLD:
-                door_opened = True
-                print(f"\nDoor confirmed open. Proceeding to crowd check after 0.5s...")
-                time.sleep(0.5)
-                break
+        #     if door_open_streak >= DOOR_OPEN_STREAK_THRESHOLD:
+        #         door_opened = True
+        #         print(f"\nDoor confirmed open. Proceeding to crowd check after 0.5s...")
+        #         time.sleep(0.5)
+        #         break
         
-        if not door_opened:
-            print("\nFailed to detect open door within the time limit. Resetting.")
-            continue
+        # if not door_opened:
+        #     print("\nFailed to detect open door within the time limit. Resetting.")
+        #     continue
 
         go_frame_streak = 0
         command_sent = False
