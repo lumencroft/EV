@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-ROI_RATIO = (0.00, 0.20, 0.30, 0.70)
+ROI_RATIO = (0.00, 0.20, 0.10, 0.90)
 BRIGHTNESS_THRESHOLD = 210
 MIN_AREA_RATIO = 0.2
 
