@@ -4,8 +4,8 @@
 set -e
 
 # --- 설정 변수 (여기만 수정하면 됩니다) ---
-SERVICE_NAME="my_script.service"
-DESCRIPTION="My Python Script Service"
+SERVICE_NAME="EV_recognition.service"
+DESCRIPTION="EV Recognition Service"
 PYTHON_SCRIPT_PATH="/home/$USER/EV/main_comm.py" # $USER 변수로 현재 사용자 홈 디렉토리 자동 설정
 WORKING_DIRECTORY="/home/$USER/EV"
 
