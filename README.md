@@ -20,3 +20,6 @@ create_service.sh - 프로젝트를 서비스로 등록
 
 
 setnetwork.sh - 이더넷 아이피를 192.168.1.21/24 로 고정.
+
+
+depth_engine - tensorrt로 빌드된 depth_anything의 inference 파일 (하드웨어 종속이라서 jetson orin nano에서만 작동 보장됨)
