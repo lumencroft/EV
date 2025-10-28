@@ -12,3 +12,9 @@ occu.py - depth_map을 이용해서 내부의 혼잡도 산출.
 depth_test.py - 위 2개를 이용해서 웹캠을 켜고 혼잡도 산출에 쓰이는 등고선과 수치가 나오는 디버깅용.
 
 commu.py - UDP 통신 관리. 
+
+
+
+---
+create_service.sh - 프로젝트를 서비스로 등록
+setnetwork.sh - 이더넷 아이피를 192.168.1.21/24 로 고정.
