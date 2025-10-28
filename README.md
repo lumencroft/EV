@@ -17,4 +17,6 @@ commu.py - UDP 통신 관리.
 
 ---
 create_service.sh - 프로젝트를 서비스로 등록
+
+
 setnetwork.sh - 이더넷 아이피를 192.168.1.21/24 로 고정.
