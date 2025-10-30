@@ -23,3 +23,11 @@ setnetwork.sh - 이더넷 아이피를 192.168.1.21/24 로 고정.
 
 
 depth_engine - tensorrt로 빌드된 depth_anything의 inference 파일 (하드웨어 종속이라서 jetson orin nano에서만 작동 보장됨)
+
+
+---
+door 관련은 일부 엘리베이터에 한해서 작동하므로 (일반적이지 않음) depth로부터 열림을 감지하는 로직을 짜야한다.
+
+
+아니면 이부분을 bypass해버리고, 로봇마다 도착신호->문이 열림 만큼의 간격을 측정하고 sleep 해서 진행하는것이 가장 간단한 해결책
+
